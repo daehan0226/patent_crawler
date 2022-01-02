@@ -2,6 +2,9 @@ import time
 from random import uniform
 
 from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 
 from Logger import Logger
 from config.config import config
@@ -49,6 +52,7 @@ class Crawler:
         self._random_wait_sleep()
         self._logging.debug(f"send text to input by {element[0]} : {element[1]}")
         try:
+            self._find_element(element).clear()
             self._find_element(element).send_keys(text)
         except Exception as e:
             self._logging.error(f"send text to input error, {e.__str__()}")
@@ -64,3 +68,18 @@ class Crawler:
             if option.text in target:
                 option.click()
                 self._find_element(move_btn).click()
+
+    def get_text(self, element):
+        self._random_wait_sleep()
+        text = self._find_element(element).text
+        self._logging.debug(f"parse text : {text}")
+        return text
+
+    def wait_for_alert(self, wait):
+        try:
+            WebDriverWait(self.driver, wait).until(EC.alert_is_present())
+            alert = self.driver.switch_to.alert
+            alert.accept()
+
+        except TimeoutException:
+            self._logging.error(f"wait for alert error")
