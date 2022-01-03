@@ -1,9 +1,10 @@
 import time
-from Crawler import Crawler
+from src.modules.Crawler import Crawler
 from config.config import config
 
 
 def run_crawler():
+    # Load webpage
     crawler = Crawler(wait=config["wait"])
     crawler.get(config["home_url"])
     elements = config["elements"]
@@ -55,7 +56,3 @@ def run_crawler():
         download_index_from += download_count_at_once
 
     crawler.quit()
-
-
-if __name__ == "__main__":
-    run_crawler()
