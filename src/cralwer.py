@@ -19,7 +19,7 @@ def run_crawler():
     crawler.click_button(elements["login_button"])
     crawler.switch_tab(0)
 
-    # Search
+    # Search - query / filter(checkbox) / sort 
     crawler.get(config["search_url"])
     crawler.send_text_to_input(
         elements["search_input"], 
@@ -31,6 +31,11 @@ def run_crawler():
         elements["search_release_checkboxes"], 
         config["search_release_check_list"], 
         check_all_element_text=config["search_release_check_all"])
+    crawler.select_sort(
+        elements["search_sort_list"],
+        config["search_sort"],
+        elements["search_sort_desc"]
+    )
     crawler.click_button(elements["search_button"])
 
     # Total patent count

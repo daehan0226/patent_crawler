@@ -89,17 +89,31 @@ class DriverManager:
         check_all_element can check or uncheck all including target input checkbox
         do not check/uncheck check_all_element if check_all_element is provided
         """
-        source_element = self._find_element(parent)
-        label_elements = source_element.find_elements_by_css_selector("label")
+        self._random_wait_sleep()
+        parent_element = self._find_element(parent)
+        label_elements = parent_element.find_elements_by_css_selector("label")
         for label_element in label_elements:
             if check_all_element_text is not None and label_element.text in check_all_element_text:
                 continue
 
             input_id = label_element.get_attribute("for")
-            input_element = source_element.find_element_by_id(input_id)
+            input_element = parent_element.find_element_by_id(input_id)
             if label_element.text in target:
                 if 'false' == input_element.get_attribute("checked"):
                     input_element.click()
             else:
                 if 'true' == input_element.get_attribute("checked"):
                     input_element.click()
+
+    def select_sort(self, parent, target, order_element):
+        self._random_wait_sleep()
+        self.click_button(parent) # show select options
+        parent_element = self._find_element(parent)
+        option_elements = parent_element.find_elements_by_css_selector("button")
+
+        for option_element in option_elements:
+            if option_element.text == target:
+                option_element.click()
+                break
+        self.click_button(order_element)
+        
