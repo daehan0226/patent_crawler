@@ -1,6 +1,6 @@
 import time
 from src.modules.driver_manager import DriverManager
-from src.utils import gen_search_query
+from src.utils import gen_search_query, download_wait
 from config.config import config
 
 
@@ -68,4 +68,5 @@ def run_crawler():
         crawler.click_button(elements["download_button"])
         download_index_from += download_count_at_once
 
+    download_wait(config["download_dir"], config["download_wait"])
     crawler.quit()
