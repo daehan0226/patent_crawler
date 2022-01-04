@@ -6,11 +6,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
-from src.modules.Logger import Logger
+from src.modules.logger import Logger
 from config.config import config
 
 
-class Crawler:
+class DriverManager:
     driver = webdriver.Chrome(config["driver"])
 
     def __init__(self, wait=1):
@@ -83,3 +83,23 @@ class Crawler:
 
         except TimeoutException:
             self._logging.error(f"wait for alert error")
+
+    def click_checkbox_label(self, parent, target, check_all_element_text=None):
+        """
+        check_all_element can check or uncheck all including target input checkbox
+        do not check/uncheck check_all_element if check_all_element is provided
+        """
+        source_element = self._find_element(parent)
+        label_elements = source_element.find_elements_by_css_selector("label")
+        for label_element in label_elements:
+            if check_all_element_text is not None and label_element.text in check_all_element_text:
+                continue
+
+            input_id = label_element.get_attribute("for")
+            input_element = source_element.find_element_by_id(input_id)
+            if label_element.text in target:
+                if 'false' == input_element.get_attribute("checked"):
+                    input_element.click()
+            else:
+                if 'true' == input_element.get_attribute("checked"):
+                    input_element.click()

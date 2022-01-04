@@ -1,11 +1,12 @@
 import time
-from src.modules.Crawler import Crawler
+from src.modules.driver_manager import DriverManager
+from src.utils import gen_search_query
 from config.config import config
 
 
 def run_crawler():
     # Load webpage
-    crawler = Crawler(wait=config["wait"])
+    crawler = DriverManager(wait=config["wait"])
     crawler.get(config["home_url"])
     elements = config["elements"]
 
@@ -20,9 +21,16 @@ def run_crawler():
 
     # Search
     crawler.get(config["search_url"])
-    crawler.click_button(elements["search_tab_button"])
-    crawler.send_text_to_input(elements["ad_from_input"], config["search_date_from"])
-    crawler.send_text_to_input(elements["ad_to_input"], config["search_data_to"])
+    crawler.send_text_to_input(
+        elements["search_input"], 
+        gen_search_query(config["search_data"]))
+    crawler.click_checkbox_label(
+        elements["search_claim_checkboxes"], 
+        config["search_claim_check_list"])
+    crawler.click_checkbox_label(
+        elements["search_release_checkboxes"], 
+        config["search_release_check_list"], 
+        check_all_element_text=config["search_release_check_all"])
     crawler.click_button(elements["search_button"])
 
     # Total patent count
