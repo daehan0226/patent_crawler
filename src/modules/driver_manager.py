@@ -5,39 +5,48 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
+from src.exceptions import ElementByTypeError, ElementInfoError, WrongPageError, SwitchTabError, AlertTimeoutError
 
-from src.modules.logger import Logger
 from config.config import config
 
 
 class DriverManager:
     driver = webdriver.Chrome(config["driver"])
 
-    def __init__(self, wait=1):
-        self._wait = wait
-        self._logging = Logger("crawler")
+    def __init__(self, logging):
+        self._wait = config["wait"]
+        self._implicitly_wait = config["implicitly_wait"]
+        self._logging = logging
 
     def _random_wait_sleep(self):
         time.sleep(uniform(self._wait, self._wait + 1))
 
-    def _find_element(self, elemnet_info):
-        by, target = elemnet_info
+    def _find_element(self, element_info):
+        try:
+            by, target = element_info
+        except ValueError:
+            raise ElementInfoError(element_info)
+
         if by == "css":
             return self.driver.find_element_by_css_selector(target)
         elif by == "xpath":
             return self.driver.find_element_by_xpath(target)
-
+        else:
+            raise ElementByTypeError(by, target)
+        
     def get(self, url):
-        self._random_wait_sleep()
         self._logging.info(f"loading url : {url}")
-        try:
-            self.driver.get(url)
-        except Exception as e:
-            self._logging.error(f"loading url error, {e.__str__()}")
+        self._random_wait_sleep()
+        self.driver.get(url)
+        self.driver.implicitly_wait(self._implicitly_wait)
+    
+    def raise_error_if_wrong_page(self, title):
+        if title not in self.driver.title:
+            raise WrongPageError
 
     def quit(self):
-        self._random_wait_sleep()
         self._logging.info(f"finished")
+        self._random_wait_sleep()
         self.driver.quit()
 
     def click_button(self, element):
@@ -59,7 +68,11 @@ class DriverManager:
 
     def switch_tab(self, index):
         self._random_wait_sleep()
-        self.driver.switch_to.window(self.driver.window_handles[index])
+        self._logging.debug(f"switching tab to {index}")
+        try:
+            self.driver.switch_to.window(self.driver.window_handles[index])
+        except IndexError:
+            raise SwitchTabError(index)
 
     def select_options(self, source, target, move_btn):
         source_element = self._find_element(source)
@@ -80,9 +93,8 @@ class DriverManager:
             WebDriverWait(self.driver, wait).until(EC.alert_is_present())
             alert = self.driver.switch_to.alert
             alert.accept()
-
         except TimeoutException:
-            self._logging.error(f"wait for alert error")
+            raise AlertTimeoutError(wait)
 
     def click_checkbox_label(self, parent, target, check_all_element_text=None):
         """
