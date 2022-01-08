@@ -2,6 +2,7 @@ import json
 
 config = {
     "home_url": "http://www.kipris.or.kr/khome/main.jsp",
+    "home_title": "KIPRIS",
     "search_url": "http://kpat.kipris.or.kr/kpat/searchLogina.do?next=MainSearch",
     "search_data" : {
         "GD": "[20100101~20211231]"
@@ -13,6 +14,7 @@ config = {
     "log_dir": "./logs/",
     "driver": "./chromedriver.exe",
     "wait": 1,
+    "implicitly_wait": 10,
     "create_file_wait": 60,
     "download_count_at_once": 5000,
     "elements": {
