@@ -42,3 +42,12 @@ class AlertTimeoutError(Exception):
     
     def __str__(self):
         return f"{self.message}, waited for : {self.wait_time}"
+
+class NoElementError(Exception):
+    def __init__(self, target, message="Could not find the element"):
+        self.target = target
+        self.message = message
+        super().__init__(self.message)
+    
+    def __str__(self):
+        return f"{self.message}, {self.target}"

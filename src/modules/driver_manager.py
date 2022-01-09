@@ -5,7 +5,8 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
-from src.exceptions import ElementByTypeError, ElementInfoError, WrongPageError, SwitchTabError, AlertTimeoutError
+from selenium.common.exceptions import NoSuchElementException
+from src.exceptions import ElementByTypeError, ElementInfoError, WrongPageError, SwitchTabError, AlertTimeoutError, NoElementError
 
 from config.config import config
 
@@ -21,19 +22,27 @@ class DriverManager:
     def _random_wait_sleep(self):
         time.sleep(uniform(self._wait, self._wait + 1))
 
-    def _find_element(self, element_info):
+    def _return_element_info_if_valid(self, element_info):
         try:
             by, target = element_info
         except ValueError:
             raise ElementInfoError(element_info)
-
-        if by == "css":
-            return self.driver.find_element_by_css_selector(target)
-        elif by == "xpath":
-            return self.driver.find_element_by_xpath(target)
-        else:
-            raise ElementByTypeError(by, target)
         
+        if by not in ["css", "xpath"]:
+            raise ElementByTypeError(by)
+        
+        return by, target
+
+    def _find_element(self, element_info):
+        by, target = self._return_element_info_if_valid(element_info)
+        try:
+            if by == "css":
+                return self.driver.find_element_by_css_selector(target)
+            elif by == "xpath":
+                return self.driver.find_element_by_xpath(target)
+        except NoSuchElementException:
+            raise NoElementError(target)
+
     def get(self, url):
         self._logging.info(f"loading url : {url}")
         self._random_wait_sleep()
@@ -51,26 +60,20 @@ class DriverManager:
 
     def click_button(self, element):
         self._random_wait_sleep()
-        self._logging.debug(f"click button by {element[0]} : {element[1]}")
-        try:
-            self._find_element(element).click()
-        except Exception as e:
-            self._logging.error(f"click button error, {e.__str__()}")
+        self._find_element(element).click()
+        self._logging.debug(f"clicked the button {element[0]} : {element[1]}")
 
     def send_text_to_input(self, element, text):
         self._random_wait_sleep()
-        self._logging.debug(f"send text to input by {element[0]} : {element[1]}")
-        try:
-            self._find_element(element).clear()
-            self._find_element(element).send_keys(text)
-        except Exception as e:
-            self._logging.error(f"send text to input error, {e.__str__()}")
+        self._find_element(element).clear()
+        self._find_element(element).send_keys(text)
+        self._logging.debug(f"sent text to input {element[0]} : {element[1]}")
 
     def switch_tab(self, index):
         self._random_wait_sleep()
-        self._logging.debug(f"switching tab to {index}")
         try:
-            self.driver.switch_to.window(self.driver.window_handles[index])
+            self.driver.switch_to.window(self.driver.window_handles[index])        
+            self._logging.debug(f"switched tab to {index}")
         except IndexError:
             raise SwitchTabError(index)
 
