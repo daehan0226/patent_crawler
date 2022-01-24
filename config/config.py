@@ -5,13 +5,16 @@ config = {
     "home_title": "KIPRIS",
     "search_url": "http://kpat.kipris.or.kr/kpat/searchLogina.do?next=MainSearch",
     "search_data" : {
-        "GD": "[20100101~20211231]"
+        "GD": "[20211121~20211231]"
     },
     "search_claim_check_list": ["특허"],
     "search_release_check_list": ["등록"],
     "search_release_check_all": ["전체"],
     "search_sort" : "등록일자",
     "log_dir": "./logs/",
+    "data_dir": "./data/",
+    "download_dir": "C:/Users/dh169/Downloads",
+    "download_wait": 60,
     "driver": "./chromedriver.exe",
     "wait": 1,
     "implicitly_wait": 10,

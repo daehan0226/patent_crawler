@@ -1,7 +1,8 @@
-import time
+import os
 from src.modules.driver_manager import DriverManager
+from src.modules.download_manager import downloadManager
 from src.modules.logger import Logger
-from src.utils import gen_search_query, download_wait
+from src.utils import gen_search_query
 from config.config import config
 
 
@@ -56,6 +57,7 @@ def run_crawler():
         )
 
         # Download loop
+        download_manager = downloadManager(config["download_dir"])
         download_index_from = 1
         download_count_at_once = config["download_count_at_once"]
         while download_index_from < int(patent_count):
@@ -71,8 +73,12 @@ def run_crawler():
             crawler.wait_for_alert(config["create_file_wait"])
             crawler.click_button(elements["download_button"])
             download_index_from += download_count_at_once
-
-        download_wait(config["download_dir"], config["download_wait"])
+            
+            download_manager.move_downloaded_files(config["data_dir"])
+        download_manager.wait_for_download_complete(config["download_wait"])
+        
+        download_manager.move_downloaded_files(config["data_dir"])
+        # download_wait(config["download_dir"], config["download_wait"])
     except Exception as e:
         logger.error(e)
     finally:
