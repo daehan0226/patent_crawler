@@ -1,5 +1,6 @@
 venv
 config/credentials.json
 logs/*
+data/*
 chromedriver.exe
 *.pyc
